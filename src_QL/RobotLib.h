@@ -158,6 +158,32 @@ void MCLK_Config(char MCLK_Clock);
 //void DrawRect(int x,int y,int width,int height,int color);
 
 
+//区块：尝试解决脉冲球问题
+
+int H_GetEyeMaxNum_Value(int n,int m);
+int s_GetEyeMaxValue(int n,int m);
+int s_GetEyeMaxNum(int n,int m);
+int s_GetSingleEye(int n,int m);
+int GetEyeMaxValue(int n,int m);
+int GetEyeMaxNum(int n,int m);
+int GetSingleEye(int n,int m); 
+/*使用说明*/
+/*int GetEyeMaxNum(int n,int m)*/ 
+/*
+取得复眼最大值编号
+参数 n 0表示复眼0   1表示复眼1   2表示所有复眼
+参数 m 0表示测频闪模式  1表示测普通模式 
+例如 GetEyeMaxNum(0,0) 表示测复眼0在频闪模式
+
+*/
+/*int GetEyeMaxValue(int n,int m)*/
+/*
+取得复眼最大值
+参数 n 0表示复眼0   1表示复眼1   2表示所有复眼
+参数 m 0表示测频闪模式  1表示测普通模式 
+例如 GetEyeMaxValue(2,0) 表示测两个复眼的最大值在频闪模式  
+
+*/
 
 
 

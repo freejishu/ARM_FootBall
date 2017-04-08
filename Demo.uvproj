@@ -427,6 +427,11 @@
               <FileType>1</FileType>
               <FilePath>.\src_QL\key_selection.c</FilePath>
             </File>
+            <File>
+              <FileName>usermain_maichong.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src_QL\usermain_maichong.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
