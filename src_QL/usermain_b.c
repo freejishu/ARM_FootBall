@@ -106,7 +106,7 @@ void findball_f()   /*正方向测球并标记**/
 	else if((eye_ch_all==0)||(eye_ch_all==13)) //->11,12
 	{gi_1=7;}
 	else
-    {gi_1=8;}  //->2,3,4   
+   {gi_1=8;}  //->2,3,4   
 }
 
 void Run_back()
@@ -168,7 +168,7 @@ int my_fwjc_cmp(){
 int sub_findfootball(){
 	
 	
-		//eye_1 = EyeInMax();
+		//eye_1 =  EyeInMax();
 		eye_ch_all=my_EyeChMax(); //获取360上复眼方向
 		eye_ch_num= AI(16+eye_ch_all);
 		if(eye_ch_all < 7){
@@ -353,7 +353,7 @@ int sub_main(void)
 		
 		//如果检测不到球，首先走一发防守程序，直到检测到球 
 		
-		while(1) find_ftbl();
+		//代谢
 		
 		
 	}
