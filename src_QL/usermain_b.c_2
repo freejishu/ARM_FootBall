@@ -1,0 +1,537 @@
+/*
+#include "RobotLib.h"
+
+void main_b()
+{
+    resettime();	
+	while(1)
+	{	 
+		SetLED(0);
+		wait(0.5);
+		SetLED(1);
+		wait(0.5);
+
+		LCD_Clear_5110();
+		printf("%d",Compass_Degree());	
+	} 
+}
+*/
+
+/* 相关定义：
+AI:
+0-15 显示屏左侧的3*16个口 由上到下
+16-22 EYE_0 0-6
+23-29 EYE_1 7-13
+*/
+
+/***前、后复眼分别接EYE0、EYE1*******************/
+/***前、后左右PSD分别接AI0、AI1、AI2、AI3********/
+#include "RobotLib.h"
+
+
+
+
+
+
+/*----2017年电教足球机器人程序_0301----*/
+
+ 
+/*---子函数声明---*/ 
+void test_adc(void);    //传感器检测
+void test_dc(void);     //电机检测
+void test_ts(void);     //弹射
+void test_pq(void);     //盘球
+void ps(void);          //盘球射门
+void cgq(void);         //传感器定义
+void follow(void);      //追球
+void kongqiu(void);     //控球处理
+void kaqiang(void);     //卡墙处理
+void ffy1(void);
+void ffy2(void);
+void ffy3(void);
+void ffy4(void);
+void ffy5(void);
+void ffy6(void);
+void ffy7(void);
+void back(void);        //无球回防
+void sc(void);          //刹车
+void run_z(int x,int y);//指南针直线走
+void turn_z(int x);
+void run(int x,int y);
+void run_k(int x,int y);
+int irl_rush(void);
+int irr_rush(void);
+int irb_rush(void);
+int irf_rush(void);
+int pcs,cmp;
+int ffx,ffy,fyl,fd;
+
+
+
+
+
+//卡球正对墙测距值
+int irf_zk=450;
+//前测距
+//      5CM        10CM       20CM       30CM       40CM
+int irf_5 =460,irf_10=330,irf_20=200,irf_30=180,irf_40=150;
+//后测距
+int irb_5 =600,irb_10=400,irb_20=140,irb_30=180,irb_40=150;
+//左测距
+int irl_5 =460,irl_10=270,irl_20=140,irl_30=130,irl_40=120;
+//右测距
+int irr_5 =600,irr_10=460,irr_20=200,irr_30=180,irr_40=120;
+
+int ball=100,ball_n=120,ball_kq=300;
+int ml,mr;
+int bz=0,hf=0,tf=0,ss=0,z_fx=0,kqf=0,kq=0,k_max=0,k_min=999,cs=400000;
+int i_stop=0,i_js=0,i_kq=0,i_nkq=0,i_kqf=0,i_hf=0,i_nhf=0,i_cs=0,i_l=0,i_r=0;
+
+float k=0.5,kp=0.9;
+float tt,t5,t6,tz,tf1,tf2,tf3,tf4,tf5,tf6,tf7;
+
+void run(int x,int y)
+{
+    SetMoto(0,- x*kp/10 );
+    SetMoto(1,- y*kp/10 );
+}
+
+void run_k(int x,int y)
+{
+  SetMoto(0,-x*k/10);   
+  SetMoto(1,-y*k/10);  
+}
+
+void panqiu(int x){
+	//盘球 0关 1开 
+	if(x) SetMoto(4,100); else SetMoto(4,0);  
+}
+
+void tanshe(int x){
+	//弹射 0关 1开 
+}
+
+int irl_rush(){
+	return AI(2);
+}
+int irr_rush(){
+	return AI(3);
+}
+int irf_rush(){
+	return AI(0);
+}
+int irb_rush(){
+	return AI(1);
+}
+
+
+void kaqiang(void)
+{
+    //前墙315-0-45
+    if(cmp>=315||cmp<=45)
+    {
+        if(irf_rush()>irf_zk+40&&irl_rush()>irr_rush()&&irl_rush()>irl_20){if(i_l<1000)i_l++;}else i_l=0;
+        if(irf_rush()>irf_zk+40&&irr_rush()>irl_rush()&&irr_rush()>irr_20){if(i_r<1000)i_r++;}else i_r=0;
+        
+        if(i_r>10)//run(-300, 800);
+        {
+           if(cmp<60||cmp>340){if(cmp>340&&cmp<345)bz=1;run(-300,800);}
+           else if(bz==1&&cmp>315){run(800,400);wait(0.2);run(800,200);wait(0.3);bz=0;}//run(0,0);wait(5);
+           else if(cmp>330){run(500,800);}
+           else if(cmp>325){run(600,800);}
+           else if(cmp>320){run(700,800);}
+           else if(cmp>315){run(800,800);}
+           else {run(800,500);} 
+        }
+        else if(i_l>10)//run( 800,-300);
+        {
+            if(cmp>300||cmp<20){if(cmp<90&&cmp>15)bz=1;run(800,-300);}
+            else if(bz==1&&cmp<45){run(400,800);wait(0.2);run(200,800);wait(0.3);bz=0;}
+            else if(cmp<30){run(800,500);}
+            else if(cmp<35){run(800,600);}
+            else if(cmp<40){run(800,700);}
+            else if(cmp<45){run(800,800);}
+            else {run(500,800);}
+        }
+        else if(cmp<180)run((1000-cmp*10),1000             );
+        else            run( 1000        ,1000-(360-cmp*10)); 
+    }
+    else if(cmp>= 60&&cmp<=120&&irr_rush()>irr_20){if(irf_rush()>irf_zk)run(-300,800);else run(300,800);}
+    else if(cmp>=240&&cmp<=300&&irl_rush()>irl_20){if(irf_rush()>irf_zk)run(800,-300);else run(800,300);}
+    //右墙45-90-135
+    else if(cmp>= 45&&cmp<=135)run(-300, 800);
+    //左墙225-270-315  
+    else if(cmp>=225&&cmp<=315)run( 800,-300);
+    //后墙135-180-225
+    else 
+    {
+        if(cmp>160&&cmp<200&&irl_rush()>irr_rush()&&irl_rush()>irl_20)       run(-300, 800);
+        else if(cmp>160&&cmp<200&&irr_rush()>irl_rush()&&irr_rush()>irr_20)  run( 800,-300);
+        else if(cmp<180)run(-300, 800);
+        else            run( 800,-300);
+    }    
+}
+   
+//       359
+//   330  0  30
+//     \  |  /
+//      \ | /
+//       \|/
+//270-----------90
+void kongqiu(void)
+{
+    if(i_kqf>10){kaqiang();}
+    else if(cmp<=35||cmp>=325)         //小于等于35度大于等于325
+    {
+        //在左边
+        if(irl_rush()>irl_30&&irr_rush()<irr_30)
+        {
+            if(cmp<180)
+            {
+                if(irf_rush()>irf_5)        run(1000,300);
+                else if(irf_rush()>irf_10)  run(1000,400);
+                else if(irf_rush()>irf_20)  run(1000,500);
+                else if(irf_rush()>irf_30)  run(1000,600);
+                else                 run(1000,700);
+            }
+            else run(1000,1000-(360-cmp)*20);
+        }
+        //在右边
+        else if(irr_rush()>irr_30&&irl_rush()<irl_30)
+        {
+            if(cmp>180)
+            {
+                if(irf_rush()>irf_5)        run(300,1000);
+                else if(irf_rush()>irf_10)  run(400,1000);
+                else if(irf_rush()>irf_20)  run(500,1000);
+                else if(irf_rush()>irf_30)  run(600,1000);
+                else                 run(700,1000);
+            }
+            else run(1000-cmp*20,1000);
+        }
+        else if(cmp<180)run(1000-cmp*10,1000);
+        else            run(1000,1000-(360-cmp*10));
+    }
+    else if(cmp>= 60&&cmp<=120&&irr_rush()>irr_20){run(500,1000);}
+    else if(cmp>=240&&cmp<=300&&irl_rush()>irl_20){run(1000,500);}
+ 
+    else if(cmp>=180)run(1000,-(360-cmp)*11+1000);
+    else run(1000-cmp*11,1000);
+    
+}
+
+void follow(void) //追球带反向绕球
+{
+    //右底角顶死
+    if(cmp>=90&&cmp<=120&&irr_rush()>irr_20&&(ffy==3||ffy==4||ffy==5)&&ffx>ball_n)      {ml=990;mr=990;}
+    //左底角顶死
+    else if(cmp>=240&&cmp<=270&&irl_rush()>irl_20&&(ffy==3||ffy==4||ffy==5)&&ffx>ball_n){ml=990;mr=990;}
+    else if(ffy==7){ffy7();}
+    else if(ffy==6){ffy6();}
+    else if(ffy==5){ffy5();}
+    else if(ffy==4){ffy4();}
+    else if(ffy==3){ffy3();}
+    else if(ffy==2){ffy2();}
+    else if(ffy==1){ffy1();}
+    else if(ffy>10){ml= 500;mr=-500;}
+    else if(ffy> 7){ml=-500;mr= 500;}
+
+    //if(pcs==0)run(0,0);
+    else run(ml,mr);
+}
+
+void ffy7(void)
+{
+    if(cmp>70&&cmp<135)tf7=seconds()+0.2;
+    if(cmp<=135||cmp>=260)
+    {
+        if(irf_rush()>irf_20)   {ml=-300;mr= 600;}
+        else             {ml=-200;mr= 600;} //7
+    }
+    else 
+    {
+        if(irf_rush()>irf_20)   {ml=-300;mr= 600;}
+        else             {ml= 300;mr= 800;}
+    }
+}
+
+void ffy6(void)
+{
+    if(cmp>70&&cmp<135)tf6=seconds()+0.2;
+    if(seconds()<tf7)  {ml=-300;mr= 800;}
+    else if(cmp<=100||cmp>=260)
+    {
+        if(irf_rush()>irf_20)  {ml=-300;mr= 600;}
+        else            {ml= 200;mr= 800;} //6
+    }
+    
+    else 
+    {
+        if(irf_rush()>irf_20)  {ml=-300;mr= 600;}
+        else if(cmp<225){ml= 800;mr= 700;}
+        else            {ml= 400;mr= 800;}
+    }
+}
+
+void ffy5(void)
+{
+    if(cmp>70&&cmp<110)tf5=seconds()+0.2;
+    if(seconds()<tf6)               {ml=-300;mr= 800;}
+    else if(cmp>=280||cmp<=100)     {ml= 400;mr= 800;}//5
+    else if(cmp>100&&cmp<130)       {ml= 700;mr= 800;}
+    else if(cmp>100&&cmp<225)       {ml= 800;mr= 700;}
+    else //if(cmp>225&&cmp<280)
+    {
+        if(irf_rush()>irf_20||irl_rush()>irl_20)  {ml= 500;mr= 800;}
+        else                        {ml= 800;mr= 500;}
+    }
+}
+
+void ffy4(void)
+{
+    
+    if(cmp>=260||cmp<=100)   
+    {
+        tf2=0;tf5=0;
+        if(fyl>100)                 {ml= 500;mr= 800;}
+        else                        {ml= 800;mr= 500;}
+    }
+    else if(cmp>135&&cmp<225)
+    {
+        if(irl_rush()>irr_rush())                 {ml= 600;mr=-300;}
+        else                        {ml=-300;mr= 600;}
+    }
+    else if(cmp>225&&cmp<260)       {ml= 300;mr= 800;}
+    else if(cmp>100&&cmp<135)       {ml= 800;mr= 300;}
+}
+
+void ffy3(void)
+{
+    if(cmp>250&&cmp<290)tf3=seconds()+0.2;
+    if(seconds()<tf2)              {ml= 800;mr=-300;}
+    else if(cmp>=250||cmp<=90)      {ml= 800;mr= 400;}  //3
+    else if(cmp>225&&cmp<250)       {ml= 800;mr= 700;}
+    else if(cmp>135&&cmp<250)       {ml= 700;mr= 800;}
+    else// if(cmp>90&&cmp<135)
+    {
+        if(irf_rush()>irf_20||irr_rush()>irr_20)  {ml= 800;mr= 500;}
+        else                        {ml= 500;mr= 800;}
+    }
+}
+
+void ffy2(void)
+{
+    if(cmp>225&&cmp<290)tf2=seconds()+0.2;
+    if(seconds()<tf1)              {ml= 800;mr=-300;}
+    else if(cmp>=260||cmp<=100)
+    {
+        if(irf_rush()>irf_20)              {ml= 600;mr=-300;}
+        else                        {ml= 800;mr= 200;}  //2
+    }
+    else 
+    {
+        if(irf_rush()>irf_20)              {ml= 600;mr=-300;}
+        else if(cmp>135)            {ml= 800;mr= 700;}
+        else                        {ml= 800;mr= 400;}
+    }
+}
+
+void ffy1(void)
+{
+    if(cmp>225&&cmp<290)tf1=seconds()+0.2;
+    if(cmp>=225||cmp<=100)
+    {
+        if(irf_rush()>irf_20)              {ml= 600;mr=-300;}
+        else                        {ml= 600;mr=-200;} //1
+    }
+    else 
+    {
+        if(irf_rush()>irf_20)              {ml= 600;mr=-300;}
+        else                        {ml= 800;mr= 300;}
+    }
+}
+
+void back(void)
+{
+    if(hf==0)
+    {
+        if(cmp>=160&&cmp<=200&&irf_rush()>irf_30&&irb_rush()<irb_30){if(i_hf<1000000)i_hf++;if(i_hf>10000)hf=1;}else i_hf=0;
+        if(cmp>140&&cmp<220&&(irf_rush()<irf_30||irb_rush()>irb_30))
+        {
+            if(cmp>=160&&cmp<=200){if(irf_rush()<50)k=0.6;else if(irf_rush()<120)k=0.5;else k=0.4;}
+            
+            if(z_fx>0)sc();
+            else run_z(800,180);
+        }
+        else turn_z(180);
+    }
+    else 
+    {
+        if((cmp>=340||cmp<=20)&&irb_rush()<irb_40){if(i_nhf<1000000)i_nhf++;if(i_nhf>10000)hf=0;}else i_nhf=0;
+        if((cmp>320||cmp<40)&&irb_rush()<irb_30&&tf>10000)
+        {
+            if(cmp>=340||cmp<=20){if(irb_rush()<50)k=0.5;else if(irb_rush()<120)k=0.4;else k=0.3;}
+            
+            if(z_fx>0)sc();
+            else run_z(-800,0);
+        }
+        else if(cmp>=355||cmp<=5){if(tf<cs)tf++;run(0,0);}
+        else {tf=0;turn_z(0);}
+    } 
+}
+
+void run_z(int x,int y)
+{
+int cmp1,cmp2; 
+ //数值转换 
+  cmp1=y;
+  cmp2=Compass_Degree();//获取指南针的位置
+
+  if(cmp1<=180){if(cmp2>=cmp1&&cmp2<(cmp1+180))cmp2=cmp2-cmp1;else {if(cmp2<cmp1)cmp2=-(cmp1-cmp2);else if(cmp2>=(cmp1+180))cmp2=-(360-cmp2+cmp1);}}
+  else {if(cmp2>=(cmp1-180)&&cmp2<cmp1)cmp2=cmp2-cmp1;else {if(cmp2>cmp1)cmp2=cmp2-cmp1;else if(cmp2<(cmp1-180))cmp2=(cmp2+360)-cmp1;}}
+  
+  if(cmp2<45){run(x-cmp2*3,x+cmp2*3);}
+  else {run(x-cmp2*10,x+cmp2*10);}
+}
+void sc(void)
+{
+    if(z_fx==1){run(500,-500);wait(0.05);}
+    else if(z_fx==2){run(-500,500);wait(0.05);}
+    run(0,0);wait(0.05);i_cs=0;z_fx=0;
+}
+
+void turn_z(int x)
+{ 
+    //数值转换 
+    int cmp1,cmp2; 
+    cmp1=x;
+    cmp2= Compass_Degree();//获取指南针的位置
+ 
+    if(cmp1<=180)
+    {
+        if(cmp2>=cmp1&&cmp2<cmp1+180)
+        {
+            cmp2=cmp2-cmp1;
+            if(cmp2>5&&cmp2<=180){if(i_cs<900000)i_cs++;} else i_cs=0;
+            if(cmp2>50&&cmp2<=180){z_fx=1;}
+            if(cmp2<10)run(0,0);
+            else if(i_cs>200000){run(-400,400);z_fx=1;}
+            else run(-200-cmp2*2,200+cmp2*2);
+        }
+        else 
+        {
+            if(cmp2<cmp1)cmp2=(cmp1-cmp2);else if(cmp2>=cmp1+180)cmp2=(360-cmp2+cmp1);
+            if(cmp2>5&&cmp2<=180){if(i_cs<900000)i_cs++;} else i_cs=0;
+            if(cmp2>50&&cmp2<=180){z_fx=2;}
+            if(cmp2<5)run(0,0);
+            else if(i_cs>200000){run(400,-400);z_fx=2;}
+            else run(200+cmp2*2,-200-cmp2*2);
+        }
+    }  
+    else 
+    {
+        if(cmp2>=(cmp1-180)&&cmp2<cmp1)
+        {
+            cmp2=cmp1-cmp2;
+            if(cmp2>5&&cmp2<=180){if(i_cs<900000)i_cs++;} else i_cs=0;
+            if(cmp2>50&&cmp2<=180){z_fx=2;}
+            if(cmp2<5)run(0,0);
+            else if(i_cs>200000){run(400,-400);z_fx=2;}
+            else run(200+cmp2*2,-200-cmp2*2);
+        }
+        else 
+        {
+            if(cmp2>cmp1)cmp2=cmp2-cmp1;else if(cmp2<cmp1-180)cmp2=(cmp2+360)-cmp1;
+            if(cmp2>5&&cmp2<=180){if(i_cs<900000)i_cs++;} else i_cs=0;
+            if(cmp2>50&&cmp2<=180){z_fx=1;}
+            if(cmp2<5)run(0,0);
+            else if(i_cs>200000){run(-400,400);z_fx=1;}
+            else run(-200-cmp2*2,200+cmp2*2);
+        }
+   }
+}
+//relay(1);emotor(1);
+void ps(void)
+{
+    if(kqf==1&&ss==1)//
+    {
+        if(seconds()<t5){panqiu(1);}
+        else if(seconds()<t5+0.5)
+        {
+            if(cmp<330&&cmp>30){panqiu(1);}
+            else{panqiu(0);tanshe(1);}
+        }
+        else if(seconds()>t5+5){panqiu(0);tanshe(0);ss=0;t6=seconds()+5;}
+        else {tanshe(0);t6=seconds()+5;}
+    }
+    else if(seconds()>t6){ss=1;t5=seconds()+1;}
+    else {panqiu(0);tanshe(0);ss=0;}
+}
+
+void cgq(void)
+{
+    //按钮控制
+    /*
+	if(trigger()==1&&seconds()>tz)
+    {
+        if(i_stop<10000)
+        {
+            i_stop++;
+            if(i_stop>1000)
+            {
+                run(0,0);panqiu(0);tanshe(0);//
+                while(trigger()==1){i_stop=0;}sound(500,500);
+                while(trigger()==0){seconds(0);cls();locate(5,5);printf("准备!!!");}
+                cls();locate(5,5);printf("进攻!!!");
+            }
+        }
+    }
+    else i_stop=0;
+    */
+		LCD_Clear_5110();
+    tz=seconds()+0.5;
+    cmp=Compass_Degree();
+    fd=AI(4);
+    ffx=AI(16);
+    ffy=(AI(17)+6)/20;
+    fyl=AI(18);
+    
+    if(irf_rush()>irf_zk-10){if(i_kqf<100000){i_kqf++;}}else i_kqf=0;
+    //控球
+    if(fd>ball_kq&&(ffy>3&&ffy<5)){if(i_kq<10000){i_kq++;}if(i_kq>10){i_nkq=100;kqf=1;}}
+    else if(fd<ball_kq-100){if(i_nkq>0)i_nkq--;if(i_nkq==0)kqf=0;}
+    else if(ffy<3||ffy>5){i_kq=0;i_nkq=0;kqf=0;}
+    else if(ffy==3&&fyl<100||ffy==5&&fyl>100){i_kq=0;i_nkq=0;kqf=0;}
+
+    if(i_js==999){kq=k_max-k_min;}
+    if(i_js<990){i_js++;if(fd>k_max)k_max=fd;if(fd<k_min)k_min=fd;}else {i_js=0;k_min=999;k_max=0;}
+
+}
+
+
+
+int sub_main(void)
+{			
+	 //程序选择
+    pcs=8; kp=0.09; kp=kp*pcs;
+    resettime(); 
+    tz=seconds()+1;
+    while(pcs==8)
+    {
+        cgq();
+        if(ffx<ball||((ffy==3||ffy==4||ffy==5)&&ffx<ball+20&&irf_rush()>irf_20&&(cmp>340||cmp<20||cmp>160&&cmp<200))){back();}
+        else 
+        {
+            if(ffx>50)hf=0;
+            //盘球
+            if(kqf==1&&cmp<330&&cmp>30){panqiu(1);}else{panqiu(0);} //panqiu() 1打开 0关闭 
+            //盘射
+            if(cmp>330||cmp<30){ps();}
+            if((ffy==3||ffy==4||ffy==5)&&i_kqf>10){kaqiang();}
+            else if(kqf==1){kongqiu();}
+            else follow();
+        }
+    }
+	 return 0; 
+}
+

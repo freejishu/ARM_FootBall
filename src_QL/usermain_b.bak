@@ -1,0 +1,640 @@
+/*
+#include "RobotLib.h"
+
+void main_b()
+{
+    resettime();	
+	while(1)
+	{	 
+		SetLED(0);
+		wait(0.5);
+		SetLED(1);
+		wait(0.5);
+
+		LCD_Clear_5110();
+		printf("%d",Compass_Degree());	
+	} 
+}
+*/
+/* 相关定义：
+AI:
+0-15 显示屏左侧的3*16个口 由上到下
+16-22 EYE_0 0-6
+23-29 EYE_1 7-13
+*/
+
+
+/**wanghm@grandar.com ** wanghm35@163.com *******/
+/**	QQ:38757291**********************************/
+/***前、后复眼分别接EYE0、EYE1*******************/
+/***前、后左右PSD分别接AI0、AI1、AI2、AI3********/
+#include "RobotLib.h"
+unsigned int gi_1=0;  /*CMP指示相对于机器人的方位标记*/
+unsigned int eye_ch_all=0; /*复眼通道*/
+unsigned int gi_2=0;  /*拨球时间计数*/ 
+unsigned int gi_3=0;  /*防后退卡死计数1*/
+unsigned int gi_4=0;   /*防后退卡死计数2*/
+unsigned int gi_5=0;  /*防后退卡死计数3*/
+unsigned int gi_6=0;  /*防后退卡死计数4*/
+
+unsigned int ball_light_d=0; /*球的远近比较域值*/    /*正前或正后方火焰值与之比较的值：得出球的远近：是否带上球或碰上球*/
+unsigned int backTime_cnt=0;   /**后退时计数比较的域值（相当于时间控制）**/
+unsigned int BoQiuTime_cnt=0; /*拨球计数（时间控制）参数*/
+unsigned int ball_light_jb=0;/*拨球亮度要求*/
+unsigned int psdf=0;  /*前红外测距*/
+unsigned int psdb=0;  /*后红外测距*/
+
+unsigned int back_psd_distance=0;  /*后红外测距B*/
+unsigned int ball_distance=0;  /*球的远近*/  /*正前或正后方火焰值*/
+
+int left_right_psddifferrence=0;  /*左右红外测距之差值*/
+unsigned int right_psd=0;   /*右侧红外测距*/
+unsigned int left_psd=0;  /*左侧红外测距*/
+unsigned int front_eye_2ch,front_eye_4ch,back_eye_9ch,back_eye_11ch;/*前偏左、前偏右、反偏左、反偏右复眼单路*/
+int compass_1=0;    //unsigned int compass_1=0;  /*指南针*/
+unsigned int eye_1=0;  /*复眼亮度最亮值*/
+unsigned int psd_ff=0;  /*前红外测距域值*/
+unsigned int psd_bb=0;  /*后红外测距域值*/
+float time_1=0.0;/*防乌龙转身时间控制*/
+
+float power_speed=1.0,t;
+unsigned int ball=80;/*有没有球*/
+unsigned int frontball=400;/*前拨球单敏探头亮度要求*/
+unsigned int backball=400;/*后拨球单敏探头亮度要求*/
+
+unsigned int Run_LastPost_0=0;  /*左轮上次提交数值*/
+unsigned int Run_LastPost_1=0;  /*右轮上次提交数值*/
+
+unsigned int Run_Ball_0=0;  /*复眼位置记录*/
+unsigned int Run_Ball_1=0;  
+unsigned int Run_Ball_2=0;  
+
+unsigned int eye_ch_du=0;
+unsigned int eye_ch_cmp=0;
+
+int my_EyeChMax()
+{
+	int ch=0;
+	Run_Ball_2 = Run_Ball_1;
+	Run_Ball_1 = Run_Ball_0;
+	ch = EyeChMax();
+	Run_Ball_0 = ch;
+	return ch;
+}
+
+int time=0;
+int key=0;
+
+void Run(int sl,int sr)   //可设置功率,范围-100--100   可通过左下和右下按钮控制电机的停、转
+{	
+	Run_LastPost_1=sl;
+	Run_LastPost_2=sr;
+	SetMoto(0,sl*power_speed);
+	SetMoto(1,sr*power_speed); 
+}
+
+//倒车系列 
+void Run_B(int sl,int sr)   //可设置功率,范围-100--100   可通过左下和右下按钮控制电机的停、转
+{
+	SetMoto(0,-sr*power_speed);
+	SetMoto(1,-sl*power_speed); 
+}
+
+void findball_f()   /*正方向测球并标记**/
+{    
+	
+	/* 
+	if((eye_ch_all<2)&&(eye_ch_all>0)) //->1 //if((eye_ch_all<3)&&(eye_ch_all>0))
+	{gi_1=2;}
+	else if((eye_ch_all>4)&&(eye_ch_all<6)) //->5  //else if((eye_ch_all>3)&&(eye_ch_all<6))
+	{gi_1=1;}
+	else if((eye_ch_all>10)||(eye_ch_all<1)) //->11,12,13,0 //else if((eye_ch_all>11)||(eye_ch_all<1))
+	{gi_1=4;}
+	else if((eye_ch_all>5)&&(eye_ch_all<10)) //->6,7,8  //else if((eye_ch_all>5)&&(eye_ch_all<9))
+	{gi_1=3;}
+	else if((eye_ch_all>9)&&(eye_ch_all<11)) //->10   //else if((eye_ch_all>8)&&(eye_ch_all<12))
+	{gi_1=5;}
+	else
+    {gi_1=0;}  //->2,3,4  
+    */
+	
+	if(eye_ch_all==1) //->1
+	{gi_1=1;}
+	else if((eye_ch_all>1)&&(eye_ch_all<5)) //->2,3,4
+	{gi_1=2;}
+	else if(eye_ch_all==5) //->5
+	{gi_1=3;}
+	else if(eye_ch_all==8) //->8
+	{gi_1=4;}
+	else if(eye_ch_all==3) //->9
+	{gi_1=5;} 
+	else if(eye_ch_all==10) //->3 
+	{gi_1=6;} 
+	else if((eye_ch_all==0)||(eye_ch_all==13)) //->11,12
+	{gi_1=7;}
+	else
+    {gi_1=8;}  //->2,3,4   
+}
+
+void attack_goal( )     /*正方向进攻*/
+{
+	my_status = 2;//进攻
+	compass_1 = Compass_Degree();//指南针 
+	ball_distance = AI(19);//三号复眼
+	psdf = AI(0);//前红外  
+	psdb = AI(1);//后 
+	psdl = AI(2);//左 
+	psdr = AI(3);//右 
+	if(AI(19) > ball_light_jb && AI(5) > ball_huoyan && psdf > psd_ff) t=seconds(); else sub_findfootball(); //计时开始 
+	
+	psd_heng_cha = psdl - psdr;
+	if(psd_heng_cha > - psd_heng_middle && psd_heng_cha < psd_heng_middle){
+		//中间部分 摆正进攻 
+		if(psd_heng_cha > 0){
+			//中间部分的左半部分
+			compass_1 = Compass_Degree();//指南针
+			if(compass_1 <= 25 || compass_1 >= 335) Run(90,100);
+			else if (compass_1 <=  90) Run((100-compass_1),100);
+			else if (compass_1 <= 180) Run(0,100);
+			else if (compass_1 <= 270) Run(100,0);
+			else if (compass_1 <= 360) Run(100,(100-compass_1));
+			
+		}else{
+			//中间部分的右半部份 
+			compass_1 = Compass_Degree();//指南针
+			if(compass_1 <= 25 || compass_1 >= 335) Run(100,90);
+			else if (compass_1 <=  90) Run(100,(100-compass_1));
+			else if (compass_1 <= 180) Run(100,0);
+			else if (compass_1 <= 270) Run(0,100);
+			else if (compass_1 <= 360) Run((360-compass_1),100);//可能有问题 
+		}
+	}else if(psd_heng_cha > psd_heng_middle){
+		//在左半部分 
+		compass_1 = Compass_Degree();//指南针
+		if(compass_1 >= 5 && compass_1 <= 45) Run(100,100);
+		if(compass_1 <  5 || compass_1 > 330) Run(100,70);
+		else Run(10,100);
+	}
+	else
+	{
+		//在右半部分 
+		compass_1 = Compass_Degree();//指南针
+		if(compass_1 <= 355 && compass_1 >= 315) Run(100,100);
+		if(compass_1 >  355 || compass_1 <   30) Run(70,100);
+		else Run(100,10);
+	}
+	
+	if(AI(19) > ball_light_jb && AI(5) > ball_huoyan && psdf > psd_ff && t - seconds() > 15) 
+	{
+		Run(0,0);
+		wait(0.5); 
+		sub_findfootball();
+	}
+
+	if((compass_1 <= 45) && (compass_1 >=0))//右前方 
+	{
+		//resettime(); //获取时间 
+		while(seconds()-t<0.05 ) // 0.05s持续 
+		{
+			ball_distance = AI(19);//获取3号复眼球距 //ball_distance = AI(17); 
+			if(ball_distance<ball_light_jb)break; //控球退出 
+		}
+	}
+	
+	t=seconds();//resettime();//起始时间 
+	while(1)                               
+	{                                      
+			compass_1=Compass_Degree();//指南针      
+			ball_distance = AI(19);//3号复眼 //ball_distance = AI(17);                     
+			if(((compass_1<260)&&(compass_1>180))||(ball_distance<ball_light_jb)||(seconds()-t>1.5))break;   
+			//如果车头朝左后 或 距离 < 控球距离要求 且 已经控了1.5s 跳出循环 
+			///AI(4)为后单敏火焰/////////	
+							
+			//尝试边转弯边击球 
+			if(compass_1<10)Run(-15,100); //右前方 
+			else if(compass_1<=20) Run(-20,100); 
+			else if(compass_1<=40)Run(-23,100);
+			else if(compass_1<=60)Run(-26,100);
+			else if(compass_1<=80)Run(-30,100);
+			else if(compass_1<=90)Run(-35,100);
+			
+			else if(compass_1>=90&&compass_1<180)Run(-35,100);  //右后方转弯 
+					
+			//缺失了 180-290的角度 
+					
+			else if(compass_1<=290)Run(100,15);//左前方 
+			else if(compass_1<=300)Run(100,30); 
+			else if(compass_1<=310)Run(100,40);
+			else if(compass_1<=320)Run(100,50); 
+			else if(compass_1<=330)Run(100,60); 
+			else if(compass_1<=340)Run(100,70); 
+			else if(compass_1<=350)Run(80,100); 					
+			else if(compass_1<=359)Run(-15,100);					 
+					
+		}                         
+	}
+	else//除了右前方 
+	{
+		if((compass_1 >= 270) && (compass_1 <= 359))
+		{
+
+			Run(100,100); //向前 
+			//////////////////////
+					if((compass_1 >= 315) && (compass_1 <= 359))//左前方 
+					{
+						t=seconds();//resettime();//读取时间 
+						while(seconds()-t<0.05 )//0.05秒 
+						{
+							ball_distance = AI(19);//ball_distance = AI(17); 
+							if(ball_distance<ball_light_jb)break; //失去球 
+						}
+					}
+					////////////////////////
+					//wait( 0.03); 
+					Run(100,-35);                           /*用力拨球**/
+					//wait( 0.001000 );
+					/*精细拨球**/
+					compass_1=Compass_Degree();               /**********/
+					ball_distance = AI(19);// //ball_distance = AI(17);    
+					gi_2=0; //标记->0                   /**********/
+					
+					t=seconds();//resettime();
+					while(1)                                  /**********/
+					{                                         /**********/
+						//Run(100,-15);             /**********/
+						//wait(0.001);                            /**********/
+						compass_1=Compass_Degree();                   /**********/
+						ball_distance = AI(19);//ball_distance = AI(17);                           /**********/
+						if(((compass_1>100)&&(compass_1<180))||(ball_distance<ball_light_jb)||(seconds()-t>1.5))break;   /***35->20*******/
+						
+						//按照球门方向转弯（带球） 
+						if(compass_1>=350)Run(100,-15); 
+						else if(compass_1>=340)Run(100,-20); 
+						else if(compass_1>=320)Run(100,-23);
+						else if(compass_1>=300)Run(100,-26);
+						else if(compass_1>=280)Run(100,-30);
+						else if(compass_1>=270)Run(100,-35);
+						
+						else if(compass_1>=180 && compass_1<270)Run(100,-35);   /////////////
+					
+						else if(compass_1>=80)Run(15,100);
+						else if(compass_1>=60)Run(30,100); 
+						else if(compass_1>=50)Run(40,100);
+						else if(compass_1>=40)Run(50,100); 
+						else if(compass_1>=30)Run(60,100); 
+						else if(compass_1>=20)Run(70,100); 
+						else if(compass_1>=10)Run(100,80); 					
+						else if(compass_1>=0)Run(100,-15);						
+					}  
+					/*                           
+					if(AI(17)>ball_light_jb)
+					{ 
+						Run(80,100);     
+						wait(0.001);
+						Run(25,90);     
+						wait(0.4);
+					}
+					*/
+				}
+				else
+				{
+					if(compass_1 <= 10)
+					{                          
+					}
+					else
+					{
+						if(compass_1 > 350)
+						{                                     /**********/
+						}
+					}
+				}
+			}
+			gi_2 = 0 ;
+		}
+		else
+		{
+			if((AI(4) > frontball || ball_distance > ball_light_d)&&((compass_1 < 20)||(compass_1 > 340)))
+			/*
+			AI(4)->（前）火焰 
+			frontball->前拨球单敏探头亮度要求
+			第一个条件：控球成功（火焰认为） 
+			
+			关联：或
+			 
+			ball_distance->球距离 
+			ball_light_d->球的远近比较域值 正前或正后方火焰值与之比较的值：得出球的远近：是否带上球或碰上球
+			第二个条件：成功控球（红外认为） 
+			 
+			第一个大条件：控球成功 
+			
+			关联：且
+			
+			第二个大条件： 指南针->前方 
+			车头朝前不用转 
+			*/
+			
+			/*角度限制***/ //if((ball_distance > ball_light_d)&&((compass_1<20)||(compass_1>340)))/*角度限制***/
+			
+			{
+				left_psd = AI(2);/*左测距*/
+				right_psd = AI(3);/*右测距*/
+			
+				if(left_psd >= right_psd && ( AI(0) < 80))    //if(left_psd >= right_psd)
+				{
+					//left_right_psddifferrence = (left_psd - right_psd)/16;
+					//Run(100,(100-left_right_psddifferrence));
+					///从左路中带////////////////////////////////// 
+					if ( left_psd>270 )   //70
+					{
+						Run(100,62);   //Run(100,50);
+					}
+					else
+					{
+						if ( left_psd>150 )  // 
+						{
+							Run(100,85);
+						}
+						else
+						{                        
+							Run(100,100);
+						}
+						////////////////////////////////////   
+					}    
+				}
+				else
+				{
+					if(right_psd > left_psd && (AI(0)<80))   //if(right_psd > left_psd)
+					{
+						//left_right_psddifferrence = (right_psd - left_psd)/16;
+						//Run((100-left_right_psddifferrence),100);
+						///从右路中带////////////////////////////////////
+						if ( right_psd>270 )// 
+						{
+							Run(62,100);  //Run(50,100);
+						}
+						else
+						{
+							if ( right_psd>150 )
+							{
+								Run(85,100);
+							}
+							else
+							{
+								Run(100,100);
+							}
+							//////////////////////////////////////////
+						} 
+					}
+					else
+					{
+						Run(100,100);   
+					}
+				}
+			}
+			else//调转车头
+			{ 
+				////////////////////////////////////////////
+  				if(AI(4)>frontball)   ////控球
+				{
+					Run(100,100);
+				}
+				else
+				{
+					front_eye_2ch = AI(18);//front_eye_2ch = AI(16);
+					front_eye_4ch = AI(20);//front_eye_4ch = AI(18);
+					if(front_eye_2ch>front_eye_4ch+200) Run(-10,60);
+					else if(front_eye_2ch>front_eye_4ch+130) Run(25,80);
+					else if(front_eye_2ch>front_eye_4ch+70) Run(65,100);
+					else if(front_eye_2ch>front_eye_4ch+40) Run(85,100);
+					else if(front_eye_2ch>front_eye_4ch+30) Run(95,100);				
+					
+					
+					else if(front_eye_4ch>front_eye_2ch+200) Run(60,-10);
+					else if(front_eye_4ch>front_eye_2ch+130) Run(80,25);
+					else if(front_eye_4ch>front_eye_2ch+70) Run(100,65);
+					else if(front_eye_4ch>front_eye_2ch+40) Run(100,85);
+					else if(front_eye_4ch>front_eye_2ch+30) Run(100,95);     
+				}     
+				////////////////////////////////////////////                
+			}
+		}
+		
+		
+	}
+}
+
+
+
+
+
+
+void Run_back()
+{
+	my_status = 3;//防守 
+	compass_1=Compass_Degree(); //获取指南针的方向 
+	if((compass_1 <20)||(compass_1 >340)) //车头朝前 
+ 	{psdb=AI(1);//获取后红外距离
+		if(psdb<100)Run(-90,-90);//离墙比较远 快速退回
+		else if(psdb<160)Run(-40,-40);//离墙距离中等 退回速度变慢
+		else if(psdb>220)Run(20,20);//离墙很近 往前蹭蹭 
+		else Run(0,0);//离墙略近 停车 
+	}
+	else if((compass_1 >160)&&(compass_1 < 200))//车头朝后 
+	{
+		psdf=AI(0);//获取前红外距离 
+		if(psdf<100)Run(90,90); //离墙比较远 快速退回
+		else if(psdf<160)Run(40,40);//离墙距离中等 退回速度变慢
+		else if(psdf>220)Run(-20,-20);//离墙很近 往前蹭蹭 
+		else Run(0,0);//离墙略近 停车 
+	}
+   
+	else if((compass_1 >= 20) && (compass_1 <  30)){Run(-16,16);}//右前方                
+	else if((compass_1 >=330) && (compass_1 <=340)){Run(16,-16);}//左前方 
+	else if((compass_1 >= 30) && (compass_1 <  60)){Run(-30,30);}// ...
+	else if((compass_1 >=300) && (compass_1 < 330)){Run(30,-30);}   
+	else if((compass_1 >= 60) && (compass_1 <  90)){Run(-50,50);}
+	else if((compass_1 >=270) && (compass_1 < 300)){Run(50,-50);}   
+     
+	else if((compass_1 >= 90) && (compass_1 < 120)){Run(50,-50);}
+	else if((compass_1 >=240) && (compass_1 < 270)){Run(-50,50);}   
+	else if((compass_1 >=120) && (compass_1 < 150)){Run(30,-30);}
+	else if((compass_1 >=210) && (compass_1 < 240)){Run(-30,30);}   
+	else if((compass_1 >=150) && (compass_1 < 160)){Run(16,-16);}   
+	else if((compass_1 > 200) && (compass_1 < 210)){Run(-16,16);}  //总之是根据方向倒车 
+}
+
+
+int a=0;
+
+int my_fwjc_cmp(){
+	compass_1=Compass_Degree();//获取指南针角度 
+	if(compass_1 <31) gi_1 = 1; 
+	else if (compass_1 <  61) gi_1 =  2; 	
+	else if (compass_1 <  91) gi_1 =  3; 
+	else if (compass_1 < 121) gi_1 =  4;
+	else if (compass_1 < 151) gi_1 =  5; 			
+	else if (compass_1 < 181) gi_1 =  6; 	   
+	else if (compass_1 < 211) gi_1 =  7; 
+	else if (compass_1 < 241) gi_1 =  8; 
+ 	else if (compass_1 < 271) gi_1 =  9; 
+    else if (compass_1 < 301) gi_1 = 10; 	
+	else if (compass_1 < 331) gi_1 = 11;
+	else gi_1 = 12;
+	
+	return compass_1;
+}
+
+int sub_findfootball(){
+		//eye_1 = EyeInMax();
+		eye_ch_all=my_EyeChMax(); //获取360上复眼方向
+		eye_ch_num= AI(16+eye_ch_all);
+		if(eye_ch_all < 7){
+			eye_ch_du = eye_ch_all*30;
+		}else{
+			eye_ch_du = (eye_ch_all-1)*30;
+		}
+		
+		if(eye_ch_all != 13 || eye_ch_all != 0){
+			eye_ch_left = AI(eye_ch_all+15);
+			eye_ch_right = AI(eye_ch_all+17);
+		} else if(eye_ch_all == 13){
+			eye_ch_left = AI(28);
+			eye_ch_right = AI(16);
+		} else if(eye_ch_all == 0){
+			eye_ch_left = AI(29);
+			eye_ch_right = AI(17);
+		}
+		
+		if(eye_ch_left>eye_ch_right)
+		{
+			eye_ch_max_s = AI(eye_ch_all+15);
+			tag_ball_distance = 1; //左边的大 
+		}
+		else
+		{
+			eye_ch_max_s = AI(eye_ch_all+17);
+			tag_ball_distance = 2; //右边的大 
+		}
+		if((eye_ch_all == 6 && tag_ball_distance == 2) ||  (eye_ch_all == 7 && tag_ball_distance == 1) 
+		||  (eye_ch_all == 13 && tag_ball_distance == 2) || (eye_ch_all == 0 && tag_ball_distance == 1))
+		{
+			//这些不做处理 该是啥就是啥
+			tag_ball_distance = 0 ; 
+		}
+		else
+		{
+			if(tag_ball_distance == 1){
+				//左减
+				my_cha = eye_ch_num - eye_ch_max_s;
+				if(my_cha <= 40) eye_ch_du = eye_ch_du - 15;
+				else if(my_cha > 40 && my_cha <= 200 ) eye_ch_du = eye_ch_du - 15 + (my_cha / 30);
+				else if(my_cha > 200 && my_cha < 400 ) eye_ch_du = eye_ch_du - 15 + (my_cha / 40);
+			}
+			else
+			{
+				//右加 
+				my_cha = eye_ch_num - eye_ch_max_s;
+				if(my_cha <= 40) eye_ch_du = eye_ch_du + 15;
+				else if(my_cha > 40 && my_cha <= 200 ) eye_ch_du = eye_ch_du + 15 - (my_cha / 30);
+				else if(my_cha > 200 && my_cha < 400 ) eye_ch_du = eye_ch_du + 15 - (my_cha / 40);
+			}
+		}
+		//和指南针对应
+		if(eye_ch_du < 90) eye_ch_du=270+eye_ch_du; else eye_ch_du=eye_ch_du-90;
+		//纠偏完成 
+		
+		eye_ch_cmp = my_fwjc_cmp();
+		
+		//以指南针为基准 
+		if(eye_ch_cmp < eye_ch_du && eye_ch_du < eye_ch_cmp+180) gi_left_right = 1; else  gi_left_right = -1; //1 在右边 -1 在左边
+		my_cha =  eye_ch_du - eye_ch_cmp;
+		if(my_cha < -180) my_cha=my_cha+360;
+		else if(my_cha < 0) my_cha=-my_cha;
+		else if(my_cha > 180){my_cha=my_cha-180;my_cha=180-my_cha;} 
+		if(my_cha==360) my_cha=0;
+
+		//指向性
+		
+		if(Run_Ball_0 == 7) Run_Ball_1 == 6; else if(Run_Ball_0 == 13) Run_Ball_1 == 0;
+		if(Run_Ball_1 == 7) Run_Ball_1 == 6; else if(Run_Ball_1 == 13) Run_Ball_1 == 0;
+		if(Run_Ball_2 == 7) Run_Ball_1 == 6; else if(Run_Ball_2 == 13) Run_Ball_1 == 0;
+		
+		//绕球 
+		
+		//if(Run_Ball_0 == Run_Ball_1 && Run_Ball_1 == Run_Ball_2 && eye_ch_num > 370){
+		//	Run(100,50);
+		//}else{
+			if(my_cha < 90 && gi_left_right = 1) Run(100*((90-my_cha)/10),my_cha); // 右边 
+			else if(my_cha <= 180 && gi_left_right =  1) Run(100,-(my_cha/0.5));
+			else if(my_cha <   90 && gi_left_right = -1) Run(my_cha , 100*((90-my_cha)/10));
+			else if(my_cha <= 180 && gi_left_right = -1) Run(-(my_cha/0.5),100);
+		//}
+		
+}
+
+
+int sub_main(void)
+{		
+	/************************/
+	/***参数调节*************/
+	/************************/    
+	ball=70;   /*有没有球*/ //经过测试，80的阈值手太短了 
+	ball_light_d =650 ;   /*球很近近比较域值:防乌龙距离、*/
+	psd_ff=508;    /*前红外测距域值,*/
+	psd_bb=508;    /*后红外测距域值,*/
+	backTime_cnt=6;   /**后退时计数比较的域值（相当于时间控制）6**/
+	BoQiuTime_cnt=45000;/*拨球计数（时间控制）参数45*/
+	ball_light_jb=500;   //400;/*拨球亮度要求*/
+    
+	frontball=360;/*前拨球单敏探头亮度要求*/
+	backball=360;/*后拨球单敏探头亮度要求s*/
+	power_speed=1.0;/*功率值，范围0.0~1.0*/    
+	/************************/    
+    
+	/*快速启动开关****/
+	//while(DI(0)==1);  
+	
+	Run(100,100);
+	wait( 0.300 );
+
+	LCD_Clear_5110();
+	printf("football v\n   football kick");
+	//LCDControl(0);
+	my_status=1;//1-寻球 2-进攻 3-防守 
+	while(1)
+	{   
+		while(EyeInMax() < ball){Run_back();}
+		//如果检测不到球，首先走一发防守程序，直到检测到球 
+		
+		sub_findfootball();
+		//eye_ch_all = my_EyeChMax();
+		psdf = AI(0);
+		if(AI(19) > ball_light_jb && AI(5) > ball_huoyan && psdf > psd_ff){
+			attack_goal(); 
+			break;
+		}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
