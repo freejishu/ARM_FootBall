@@ -9,9 +9,52 @@
 
 
 int sum_key=0; 		 
-int num_1=0,num_2=0,test_num=0; 		
+int num_1=0,num_2=0,test_num=0; 
+		int HTZ_Ch,HTZ_In;
 			
-			
+int H_GetEyeMaxNum_Value(int n,int m)
+{
+	int i,j,temp;
+	//int temp_id;
+	int tv[14];
+	int tid[14];
+	int num=7;
+    if(n>2) return 0;
+    if(n==2)
+    {
+    	n=0;
+    	num=14;
+    }
+    else
+    {
+    	num=7;
+    }  
+	for(i=0;i<num;i++)
+	{
+		tv[i]=s_GetSingleEye(i+7*n,m);
+		tid[i]=i;
+	}
+	for(i=0;i<num-1;i++)
+	{
+ 		for(j=i+1;j<num;j++)   
+		{
+			if(tv[i]>tv[j])
+			{
+				temp=tv[i];
+				tv[i]=tv[j];
+				tv[j]=temp;   
+				temp=tid[i];
+				tid[i]=tid[j];
+				tid[j]=temp;  					       		          		
+			}
+		} 
+	}
+    //return tid[num-1];
+	HTZ_Ch=tid[num-1];
+	HTZ_In=tv[num-1];
+	return 0;
+}
+
 
 
 int test_main(void)
@@ -37,8 +80,8 @@ int main_key_selection(void)
 	printf_XY(2,0,"QX_ROBOT I");    printf_XY(76,0,"%d",sum_key);
 	
 	printf_XY(6,1,"0 ftbl");      printf_XY(48,1,"5 ...");
-	printf_XY(6,2,"1 jsts");       printf_XY(48,2,"6 ...");
-	printf_XY(6,3,"2 ...");       printf_XY(48,3,"7 ...");
+	printf_XY(6,2,"1 jsts");      printf_XY(48,2,"6 ...");
+	printf_XY(6,3,"2 TsMC");       printf_XY(48,3,"7 ...");
 	printf_XY(6,4,"3 ...");       printf_XY(48,4,"8 rtc");
 	printf_XY(6,5,"4 ...");       printf_XY(48,5,"9 test");
 
@@ -153,8 +196,19 @@ int main_key_selection(void)
 	}
 	else if(sum_key==2)
 	{
-		LCD_Clear_5110();
-		while(1){Printf_XY(0,0,"irl=%d",irl);wait(0.05);}
+		
+
+		while(1){
+    LCD_Clear_5110();  
+    //Printf("ch=%d,ch=%d,"MY_EyeChMax()); 
+		printf_XY(0,1,"Tch=%d",GetEyeMaxNum(2,0));    printf_XY(42,1,"Tin=%d",GetEyeMaxValue(2,0));
+		printf_XY(0,2,"10C=%d",s_GetEyeMaxNum(2,0));  printf_XY(42,2,"10I=%d",s_GetEyeMaxValue(2,0));
+		printf_XY(0,3,"ch=%d",GetEyeMaxNum(2,1));     printf_XY(42,3,"in=%d",GetEyeMaxValue(2,1));
+    printf_XY(0,4,"HCh=%d",HTZ_Ch);               printf_XY(42,4,"HIn=%d",HTZ_In);
+    printf_XY(0,5,"T10=%d",GetSingleEye(10,0));   printf_XY(44,5,"10C=%d",GetSingleEye(10,1));
+		printf_XY(0,0,"Test MaiChong"); 
+		wait(0.05);
+		}
 		
 	}
 

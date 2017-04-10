@@ -29,7 +29,6 @@ AI:
 #include "RobotLib.h"
 
 int kk_cnt;
-int HTZ_Ch,HTZ_In;	  //调制模式下，通道号、亮度值一起采集
 /* 
 这个程序是按照前后两块复眼板写的（7+7=14路）
 
@@ -43,48 +42,7 @@ int HTZ_Ch,HTZ_In;	  //调制模式下，通道号、亮度值一起采集
 
 //////////////////////////////////////////////////////////////////////////////
 //这个函数一次性把通道号和亮度值取出，很多时候可以节约一半时间////////////////
-int H_GetEyeMaxNum_Value(int n,int m)
-{
-	int i,j,temp;
-	//int temp_id;
-	int tv[14];
-	int tid[14];
-	int num=7;
-    if(n>2) return 0;
-    if(n==2)
-    {
-    	n=0;
-    	num=14;
-    }
-    else
-    {
-    	num=7;
-    }  
-	for(i=0;i<num;i++)
-	{
-		tv[i]=s_GetSingleEye(i+7*n,m);
-		tid[i]=i;
-	}
-	for(i=0;i<num-1;i++)
-	{
- 		for(j=i+1;j<num;j++)   
-		{
-			if(tv[i]>tv[j])
-			{
-				temp=tv[i];
-				tv[i]=tv[j];
-				tv[j]=temp;   
-				temp=tid[i];
-				tid[i]=tid[j];
-				tid[j]=temp;  					       		          		
-			}
-		} 
-	}
-    //return tid[num-1];
-	HTZ_Ch=tid[num-1];
-	HTZ_In=tv[num-1];
-	return 0;
-}
+
 
 int sub_main(void)
 {			
@@ -116,15 +74,12 @@ int sub_main(void)
       while(1);
       */
 
-      H_GetEyeMaxNum_Value(2,0);     
-
-      LCD_Clear_5110();  
-      //Printf("ch=%d,ch=%d,"MY_EyeChMax()); 
-      printf_XY(0,1,"Tch=%d",GetEyeMaxNum(2,0));   printf_XY(42,1,"Tin=%d",GetEyeMaxValue(2,0)); 
-      printf_XY(0,2,"10C=%d",s_GetEyeMaxNum(2,0));   printf_XY(42,2,"10I=%d",s_GetEyeMaxValue(2,0));//
-      printf_XY(0,3,"ch=%d",GetEyeMaxNum(2,1));     printf_XY(42,3,"in=%d",GetEyeMaxValue(2,1));
-      printf_XY(0,4,"HCh=%d",HTZ_Ch);     printf_XY(42,4,"HIn=%d",HTZ_In);
-      printf_XY(0,5,"T10=%d",GetSingleEye(10,0));     printf_XY(44,5,"10C=%d",GetSingleEye(10,1));
+      
+			/*
+			
+     //
+      
+			*/
       //GetSingleEye(int n,int m)
       wait(0.1);
     }
