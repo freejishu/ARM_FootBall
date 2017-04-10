@@ -131,6 +131,31 @@ int main_a(void)   //int sub_main(void)   //void main()
 		}
 	}
 
+	
+	// EYE_AI ??
+	resettime();
+	while(1)
+	{
+		//SetMoto(0,100);
+		//SetMoto(1,-50);
+		//LCD_SetXY(0,0);
+		LCD_Clear_5110();
+		//printf("EYE_AI=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",AI(16),AI(17),AI(18),AI(19),AI(20),AI(21),AI(22),AI(23),AI(24),AI(25),AI(26),AI(27),AI(28),AI(29));
+		printf_XY(30,0,"EYE0-MC");
+		printf_XY(0,1,"%d",GetSingleEye(0,0));    printf_XY(22,1,"%d",GetSingleEye(1,0));   printf_XY(44,1,"%d",GetSingleEye(2,0));   printf_XY(66,1,"%d",GetSingleEye(3,0));
+		printf_XY(0,2,"%d",GetSingleEye(4,0));    printf_XY(22,2,"%d",GetSingleEye(5,0));   printf_XY(44,2,"%d",GetSingleEye(6,0));   
+		printf_XY(30,3,"EYE1-MC");
+		printf_XY(0,4,"%d",GetSingleEye(7,0));    printf_XY(22,4,"%d",GetSingleEye(8,0));   printf_XY(44,4,"%d",GetSingleEye(9,0));   printf_XY(66,4,"%d",GetSingleEye(10,0));
+		printf_XY(0,5,"%d",GetSingleEye(11,0));    printf_XY(22,5,"%d",GetSingleEye(12,0));   printf_XY(44,5,"%d",GetSingleEye(13,0));
+		wait(0.2);
+		//if(seconds()>2.0)break;
+		if(Get_Button(0)==1) 
+		{
+			
+			wait(0.2);
+			break;
+		}
+	}
 
 	// AI ??
 	resettime();
