@@ -10,7 +10,7 @@
 
 int sum_key=0; 		 
 int num_1=0,num_2=0,test_num=0; 
-		int HTZ_Ch,HTZ_In;
+int HTZ_Ch,HTZ_In;
 			
 int H_GetEyeMaxNum_Value(int n,int m)
 {
@@ -82,7 +82,7 @@ int main_key_selection(void)
 	printf_XY(6,1,"0 ftbl");      printf_XY(48,1,"5 ...");
 	printf_XY(6,2,"1 jsts");      printf_XY(48,2,"6 ...");
 	printf_XY(6,3,"2 TsMC");       printf_XY(48,3,"7 ...");
-	printf_XY(6,4,"3 ...");       printf_XY(48,4,"8 rtc");
+	printf_XY(6,4,"3 TsMe");       printf_XY(48,4,"8 rtc");
 	printf_XY(6,5,"4 ...");       printf_XY(48,5,"9 test");
 
 	//printf_XY(0,1,">");
@@ -214,8 +214,73 @@ int main_key_selection(void)
 
 	else if(sum_key==3)
 	{
+		
+		int speed_left=0,speed_right=0;
+		int tag_left=1,tag_right=1;//1+ 2-
 		LCD_Clear_5110();
-		Printf("3 ...");
+		printf_XY(0,0,"Mec Test");
+		printf_XY(0,1,"********************");
+		printf_XY(0,2,"ls=%d",speed_left);
+		printf_XY(0,3,"rs=%d",speed_right);
+		printf_XY(0,4,"********************");
+		SetMoto(0,0);
+		SetMoto(1,0); 
+		while(1){ 
+			if(Get_Button(0)==1) {
+				//Õ˘”“->◊Û¬÷
+				if(tag_left==1){
+					speed_left=speed_left+10;
+					if(speed_left==110){
+						speed_left=90;tag_left=2;
+					}
+				}else{
+					speed_left=speed_left-10;
+					if(speed_left==-100){
+						speed_left=-90;tag_left=1;
+					}
+				}
+				SetMoto(0,speed_left);
+				LCD_Clear_5110();
+				printf_XY(0,0,"Mec Test");
+				printf_XY(0,1,"********************");
+				printf_XY(0,2,"ls=%d",speed_left);
+				printf_XY(0,3,"rs=%d",speed_right);
+				printf_XY(0,4,"********************");
+				wait(0.5);
+			}
+			if(Get_Button(2)==1) {
+				//Õ˘◊Û->”“¬÷
+				if(tag_right==1){
+					speed_right=speed_right+10;
+					if(speed_right==110){
+						speed_right=90;tag_right=2;
+					}
+				}else{
+					speed_right=speed_right-10;
+					if(speed_right==-110){
+						speed_right=-90;tag_right=1;
+					}
+				}
+				SetMoto(1,speed_right);
+				LCD_Clear_5110();
+				printf_XY(0,0,"Mec Test");
+				printf_XY(0,1,"********************");
+				printf_XY(0,2,"ls=%d",speed_left);
+				printf_XY(0,3,"rs=%d",speed_right);
+				printf_XY(0,4,"********************");
+				wait(0.5);
+			}
+				wait(0.03);
+		}
+		
+		//printf_XY(0,2,"left speed=100");
+		//printf_XY(0,3,"right speed=100");
+		//while(1){
+		
+		//}
+		
+		
+		
 	}
 	else if(sum_key==4)
 	{
