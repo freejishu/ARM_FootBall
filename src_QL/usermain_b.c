@@ -34,7 +34,7 @@ int kk_cnt;
 
 这个程序对应的复眼是从AI(16)开始
 
-因为我们的控制器的AI(0)~AI(15）是预留其他给其他模拟传感器用的。
+因为我们的控制器的AI(0)~AI(15)是预留其他给其他模拟传感器用的。
 复眼接口用的AI(16)开始到AI(29).
 
 前后两块复眼用了7+7=14路模拟口：AI(16)到AI(29).
@@ -184,10 +184,10 @@ int sub_findfootball(){
 	printf_XY(0,0,"ftbl a 0.01");
 		//eye_1 = EyeInMax();
 		eye_ch_all=GetEyeMaxNum(2,0); //获取360上复眼方向
-		eye_ch_num= AI(16+eye_ch_all);
+		eye_ch_num= GetSingleEye(eye_ch_all,0);
 		
-		printf_XY(0,1,"eye_ch_all=%d",eye_ch_all);
-		printf_XY(0,2,"eye_ch_num=%d",eye_ch_num);
+		//printf_XY(0,1,"eye_ch_all=%d",eye_ch_all);
+		//printf_XY(0,2,"eye_ch_num=%d",eye_ch_num);
 		
 		if(eye_ch_all < 7){
 			eye_ch_du = eye_ch_all*30;
@@ -195,29 +195,33 @@ int sub_findfootball(){
 			eye_ch_du = (eye_ch_all-1)*30;
 		}
 		
-		printf_XY(0,3,"eye_ch_du=%d",eye_ch_du);
-		
+		printf_XY(0,1,"eye_ch_du=%d",eye_ch_du);
+		//到这没毛病
+		 
 		if(eye_ch_all != 13 || eye_ch_all != 0){
-			eye_ch_left = AI(eye_ch_all+15);
-			eye_ch_right = AI(eye_ch_all+17);
+			eye_ch_left = GetSingleEye(eye_ch_all-1,0);
+			eye_ch_right = GetSingleEye(eye_ch_all+1,0);
 		} else if(eye_ch_all == 13){
-			eye_ch_left = AI(28);
-			eye_ch_right = AI(16);
+			eye_ch_left = GetSingleEye(12,0);
+			eye_ch_right = GetSingleEye(0,0);
 		} else if(eye_ch_all == 0){
-			eye_ch_left = AI(29);
-			eye_ch_right = AI(17);
+			eye_ch_left = GetSingleEye(13,0);
+			eye_ch_right = GetSingleEye(1,0);
 		}
 		
 		if(eye_ch_left>eye_ch_right)
 		{
-			eye_ch_max_s = AI(eye_ch_all+15);
+			eye_ch_max_s = eye_ch_left;
 			tag_ball_distance = 1; //左边的大 
+			printf_XY(0,2,"l>r %d>%d",eye_ch_left,eye_ch_right);
 		}
 		else
 		{
-			eye_ch_max_s = AI(eye_ch_all+17);
+			eye_ch_max_s = eye_ch_right;
 			tag_ball_distance = 2; //右边的大 
+			printf_XY(0,2,"r>l %d>%d",eye_ch_right,eye_ch_left);
 		}
+		
 		if((eye_ch_all == 6 && tag_ball_distance == 2) ||  (eye_ch_all == 7 && tag_ball_distance == 1) 
 		||  (eye_ch_all == 13 && tag_ball_distance == 2) || (eye_ch_all == 0 && tag_ball_distance == 1))
 		{
@@ -242,14 +246,15 @@ int sub_findfootball(){
 				else if(my_cha > 200 && my_cha < 400 ) eye_ch_du = eye_ch_du + 15 - (my_cha / 40);
 			}
 		}
-		
+		printf_XY(0,3,"tbd=%d",tag_ball_distance);
+		printf_XY(0,4,"my_cha=%d",my_cha);
 		//和指南针对应
 		if(eye_ch_du < 90) eye_ch_du=270+eye_ch_du; else eye_ch_du=eye_ch_du-90;
 		//纠偏完成 
-		printf_XY(0,4,"eye_ch_du=%d",eye_ch_du);
+		
 		
 		eye_ch_cmp = my_fwjc_cmp();
-		printf_XY(0,5,"eye_ch_cmp=%d",eye_ch_cmp);
+		
 		//以指南针为基准 
 		if(eye_ch_cmp < eye_ch_du && eye_ch_du < eye_ch_cmp + 180) gi_left_right = 1; else  gi_left_right = 2; //1 在右边 -1 在左边
 		my_cha =  eye_ch_du - eye_ch_cmp;
