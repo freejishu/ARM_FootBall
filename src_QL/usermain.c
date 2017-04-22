@@ -150,8 +150,7 @@ int main_a(void)   //int sub_main(void)   //void main()
 		wait(0.2);
 		//if(seconds()>2.0)break;
 		if(Get_Button(0)==1) 
-		{
-			
+		{		
 			wait(0.2);
 			break;
 		}

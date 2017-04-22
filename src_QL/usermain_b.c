@@ -68,11 +68,17 @@ unsigned int Run_Ball_2=0;
 
 unsigned int my_status=0;
 
+unsigned int left_speed=0;
+unsigned int right_speed=0;
+
 unsigned int eye_ch_du=0;
 unsigned int eye_ch_cmp=0;
 
 unsigned int ball_distance=0;  /*ÇòµÄÔ¶½ü*/  /*ÕıÇ°»òÕıºó·½»ğÑæÖµ*/
 unsigned int ball_light_jb=400;/*²¦ÇòÁÁ¶ÈÒªÇó*/
+///////////////////////////////////////////////////////////////
+int ball_huoyan=100;
+int eye_yuan_jin=300;
 
 
 int my_EyeChMax()
@@ -94,6 +100,8 @@ void Run(int sl,int sr)   //¿ÉÉèÖÃ¹¦ÂÊ,·¶Î§-100--100   ¿ÉÍ¨¹ı×óÏÂºÍÓÒÏÂ°´Å¥¿ØÖÆµ
 	//Run_LastPost_2=sr;
 	//SetMoto(0,sl*power_speed);
 	//SetMoto(1,sr*power_speed); 
+	SetMoto(0,sl);
+	SetMoto(1,sr); 
 }
 
 //µ¹³µÏµÁĞ 
@@ -181,111 +189,45 @@ int my_fwjc_cmp(){
 
 int sub_findfootball(){
 	LCD_Clear_5110();
-	printf_XY(0,0,"ftbl a 0.01");
-		//eye_1 = EyeInMax();
-		eye_ch_all=GetEyeMaxNum(2,0); //»ñÈ¡360ÉÏ¸´ÑÛ·½Ïò
-		eye_ch_num= GetSingleEye(eye_ch_all,0);
-		
-		//printf_XY(0,1,"eye_ch_all=%d",eye_ch_all);
-		//printf_XY(0,2,"eye_ch_num=%d",eye_ch_num);
-		
-		if(eye_ch_all < 7){
-			eye_ch_du = eye_ch_all*30;
-		}else{
-			eye_ch_du = (eye_ch_all-1)*30;
-		}
-		
-		printf_XY(0,1,"eye_ch_du=%d",eye_ch_du);
-		//µ½ÕâÃ»Ã«²¡
-		 
-		if(eye_ch_all != 13 || eye_ch_all != 0){
-			eye_ch_left = GetSingleEye(eye_ch_all-1,0);
-			eye_ch_right = GetSingleEye(eye_ch_all+1,0);
-		} else if(eye_ch_all == 13){
-			eye_ch_left = GetSingleEye(12,0);
-			eye_ch_right = GetSingleEye(0,0);
-		} else if(eye_ch_all == 0){
-			eye_ch_left = GetSingleEye(13,0);
-			eye_ch_right = GetSingleEye(1,0);
-		}
-		
-		if(eye_ch_left>eye_ch_right)
-		{
-			eye_ch_max_s = eye_ch_left;
-			tag_ball_distance = 1; //×ó±ßµÄ´ó 
-			printf_XY(0,2,"l>r %d>%d",eye_ch_left,eye_ch_right);
-		}
-		else
-		{
-			eye_ch_max_s = eye_ch_right;
-			tag_ball_distance = 2; //ÓÒ±ßµÄ´ó 
-			printf_XY(0,2,"r>l %d>%d",eye_ch_right,eye_ch_left);
-		}
-		
-		if((eye_ch_all == 6 && tag_ball_distance == 2) ||  (eye_ch_all == 7 && tag_ball_distance == 1) 
-		||  (eye_ch_all == 13 && tag_ball_distance == 2) || (eye_ch_all == 0 && tag_ball_distance == 1))
-		{
-			//ÕâĞ©²»×ö´¦Àí ¸ÃÊÇÉ¶¾ÍÊÇÉ¶
-			tag_ball_distance = 0 ; 
-		}
-		else
-		{
-			if(tag_ball_distance == 1){
-				//×ó¼õ
-				my_cha = eye_ch_num - eye_ch_max_s;
-				if(my_cha <= 40) eye_ch_du = eye_ch_du - 15;
-				else if(my_cha > 40 && my_cha <= 200 ) eye_ch_du = eye_ch_du - 15 + (my_cha / 30);
-				else if(my_cha > 200 && my_cha < 400 ) eye_ch_du = eye_ch_du - 15 + (my_cha / 40);
-			}
-			else
-			{
-				//ÓÒ¼Ó 
-				my_cha = eye_ch_num - eye_ch_max_s;
-				if(my_cha <= 40) eye_ch_du = eye_ch_du + 15;
-				else if(my_cha > 40 && my_cha <= 200 ) eye_ch_du = eye_ch_du + 15 - (my_cha / 30);
-				else if(my_cha > 200 && my_cha < 400 ) eye_ch_du = eye_ch_du + 15 - (my_cha / 40);
-			}
-		}
-		printf_XY(0,3,"tbd=%d",tag_ball_distance);
-		printf_XY(0,4,"my_cha=%d",my_cha);
-		//ºÍÖ¸ÄÏÕë¶ÔÓ¦
-		if(eye_ch_du < 90) eye_ch_du=270+eye_ch_du; else eye_ch_du=eye_ch_du-90;
-		//¾ÀÆ«Íê³É 
-		
-		
-		eye_ch_cmp = my_fwjc_cmp();
-		
-		//ÒÔÖ¸ÄÏÕëÎª»ù×¼ 
-		if(eye_ch_cmp < eye_ch_du && eye_ch_du < eye_ch_cmp + 180) gi_left_right = 1; else  gi_left_right = 2; //1 ÔÚÓÒ±ß -1 ÔÚ×ó±ß
-		my_cha =  eye_ch_du - eye_ch_cmp;
-		if(my_cha + 360 < 180) my_cha = my_cha + 360;
-		else if(my_cha < 1) my_cha= - my_cha;
-		else if(my_cha > 180){my_cha=my_cha-180;my_cha=180-my_cha;} 
-		if(my_cha==360) my_cha=0;
+	printf_XY(0,0,"ftbl a 0.12");
 
-		//Ö¸ÏòĞÔ
-		
-		if(Run_Ball_0 == 7) Run_Ball_1 = 6; else if(Run_Ball_0 == 13) Run_Ball_1 = 0;
-		if(Run_Ball_1 == 7) Run_Ball_1 = 6; else if(Run_Ball_1 == 13) Run_Ball_1 = 0;
-		if(Run_Ball_2 == 7) Run_Ball_1 = 6; else if(Run_Ball_2 == 13) Run_Ball_1 = 0;
-		
-		//ÈÆÇò 
-		
-		//if(Run_Ball_0 == Run_Ball_1 && Run_Ball_1 == Run_Ball_2 && eye_ch_num > 370){
-		//	Run(100,50);
-		//}else{
-		/*
-			if(my_cha < 90 && gi_left_right == 1) Run(100*((90-my_cha)/10),my_cha); // ÓÒ±ß 
-			else if(my_cha <= 180 && gi_left_right ==  1) Run(100,-(my_cha/0.5));
-			else if(my_cha <   90 && gi_left_right ==  2) Run(my_cha , 100*((90-my_cha)/10));
-			else if(my_cha <= 180 && gi_left_right ==  2) Run(-(my_cha/0.5),100);
-			*/
-		//}
-		//printf_XY(0,1,"my_cha=%d",my_cha);
-		wait(0.05);
-		return 0;
+	eye_ch_all=GetEyeMaxNum(2,0); //»ñÈ¡360ÉÏ¸´ÑÛ·½Ïò
+	eye_ch_num=GetSingleEye(eye_ch_all,0); //»ñÈ¡µ¥¸ö 
+	if(AI(5) > ball_huoyan)return 0;//½ø¹¥ 
+	
+	//·Ö¿é¿ØÖÆ
+	//                                  ½ü¾àÀë             Ô¶¾àÀë 
+	if(eye_ch_num > eye_yuan_jin)     Run(0,100);   else Run(0,100);
+	}else if(eye_ch_all==1){
+		if(eye_ch_num > eye_yuan_jin) Run(30,100);  else Run(30,100);
+	}else if(eye_ch_all==2){
+		if(eye_ch_num > eye_yuan_jin) Run(60,100);  else Run(60,100);
+	}else if(eye_ch_all==3){
+		if(eye_ch_num > eye_yuan_jin) Run(100,100); else Run(100,100);
+	}else if(eye_ch_all==4){
+		if(eye_ch_num > eye_yuan_jin) Run(100,60);  else Run(100,60);
+	}else if(eye_ch_all==5){
+		if(eye_ch_num > eye_yuan_jin) Run(100,30);  else Run(100,30);
+	}else if(eye_ch_all==6){
+		if(eye_ch_num > eye_yuan_jin) Run(100,0);   else Run(100,0); 
+	}else if(eye_ch_all==7){
+		if(eye_ch_num > eye_yuan_jin) Run(100,-10); else Run(100,-10);  
+	}else if(eye_ch_all==8){
+		if(eye_ch_num > eye_yuan_jin) Run(100,-30); else Run(100,-30);
+	}else if(eye_ch_all==9){
+		if(eye_ch_num > eye_yuan_jin) Run(100,-60); else Run(100,-60); 
+	}else if(eye_ch_all==10){
+		if(eye_ch_num > eye_yuan_jin) Run(100,-100);else Run(100,-100); //×ó»¹ÊÇÓÒ£¿ 
+	}else if(eye_ch_all==11){
+		if(eye_ch_num > eye_yuan_jin) Run(-60,100); else Run(-60,100);
+	}else if(eye_ch_all==12){
+		if(eye_ch_num > eye_yuan_jin) Run(-30,100); else Run(-30,100); 
+	}else if(eye_ch_all==13){
+		if(eye_ch_num > eye_yuan_jin) Run(0,100);   else Run(0,100);  
+	}
+
+	return 0;
 }
-
 void attack_goal( )     /*Õı·½Ïò½ø¹¥*/
 {
 	my_status = 2;//½ø¹¥
@@ -357,10 +299,11 @@ int sub_main(void)
 	my_status=1;//1-Ñ°Çò 2-½ø¹¥ 3-·ÀÊØ 
 	while(1)
 	{   
-		
+		LCD_Clear_5110();
+		printf_XY(0,0,"ftbl a 0.02");
 		while(EyeInMax() < ball){Run_back();}
 		sub_findfootball();
-		while (1) if(Get_Button(0)==1) break;
+		//while (1) if(Get_Button(0)==1) break;
 	}
 }
 
