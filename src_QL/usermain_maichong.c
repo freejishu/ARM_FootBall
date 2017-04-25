@@ -23,12 +23,13 @@
 int GetSingleEye(int n,int m)
 {
 	int i,j;
-    float t,temp_t;
-    int AI_c;
-    int AI_v[30];
+  float t,temp_t;
+  int AI_c;
+  int AI_v[30];
 	int AI_Max,AI_Min;
 	int dis;
 	int temp;
+	int last[13];
     AI_c=0;
     if(n>13) return 0;
     t=seconds();
@@ -67,6 +68,9 @@ int GetSingleEye(int n,int m)
 	{
 		dis=AI_Max;    
 	}
+	temp=last[n]*0.5;
+	if(dis < temp) dis = GetSingleEye(n,m);
+	last[n] = dis ;
     return dis;
 }
 

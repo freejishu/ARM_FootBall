@@ -5,6 +5,8 @@ int btn_1=1280;
 int MOTO_Dir=0;
 int MOTO_val=0;
 int i=0,j=0;
+char ch[3];
+//int i=345;
 int main_a(void)   //int sub_main(void)   //void main()
 {
     
@@ -245,8 +247,25 @@ int main_a(void)   //int sub_main(void)   //void main()
 			break;
 		}
 	}
-
+	/*
+	resettime();
+	LCD_Clear_5110();
+	printf("      FLASH TEST");
 	
+	for(i=0;i<100;i++){
+
+	}
+	for(i=0;i<100;i++){
+		printf("%d",FLASH_Read(i));
+	}
+	while(1){
+		if(Get_Button(0)==1) 
+		{
+			break;
+		}
+	}
+	
+	*/
 
 	// serv moto ??
 	resettime();

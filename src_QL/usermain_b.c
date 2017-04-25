@@ -77,8 +77,10 @@ unsigned int eye_ch_cmp=0;
 unsigned int ball_distance=0;  /*球的远近*/  /*正前或正后方火焰值*/
 unsigned int ball_light_jb=400;/*拨球亮度要求*/
 ///////////////////////////////////////////////////////////////
-int ball_huoyan=100;
-int eye_yuan_jin=300;
+
+int eye_jin_zhong=300;
+int eye_zhong_yuan=300;
+int eye_yuan_jin=0;
 
 
 int my_EyeChMax()
@@ -180,7 +182,7 @@ int my_fwjc_cmp(){
 	else if (compass_1 < 211) gi_1 =  7; 
 	else if (compass_1 < 241) gi_1 =  8; 
  	else if (compass_1 < 271) gi_1 =  9; 
-    else if (compass_1 < 301) gi_1 = 10; 	
+  else if (compass_1 < 301) gi_1 = 10; 	
 	else if (compass_1 < 331) gi_1 = 11;
 	else gi_1 = 12;
 	
@@ -193,11 +195,13 @@ int sub_findfootball(){
 
 	eye_ch_all=GetEyeMaxNum(2,0); //获取360上复眼方向
 	eye_ch_num=GetSingleEye(eye_ch_all,0); //获取单个 
-	if(AI(5) > ball_huoyan)return 0;//进攻 
+	 
+	if(AI(5) > ball_huoyan) return 0;//进攻 
 	
 	//分块控制
 	//                                  近距离             远距离 
-	if(eye_ch_num > eye_yuan_jin)     Run(0,100);   else Run(0,100);
+	if(eye_ch_num > eye_yuan_jin){    
+		if(eye_ch_num > eye_yuan_jin) Run(0,100);   else Run(0,100);
 	}else if(eye_ch_all==1){
 		if(eye_ch_num > eye_yuan_jin) Run(30,100);  else Run(30,100);
 	}else if(eye_ch_all==2){

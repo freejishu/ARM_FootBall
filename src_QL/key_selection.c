@@ -207,7 +207,7 @@ int main_key_selection(void)
     printf_XY(0,4,"HCh=%d",HTZ_Ch);               printf_XY(42,4,"HIn=%d",HTZ_In);
     printf_XY(0,5,"T10=%d",GetSingleEye(10,0));   printf_XY(44,5,"10C=%d",GetSingleEye(10,1));
 		printf_XY(0,0,"Test MaiChong"); 
-		wait(0.05);
+		wait(0.1);
 		}
 		
 	}
