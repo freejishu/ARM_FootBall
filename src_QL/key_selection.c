@@ -83,7 +83,7 @@ int main_key_selection(void)
 	printf_XY(6,2,"1 jsts");      printf_XY(48,2,"6 ...");
 	printf_XY(6,3,"2 TsMC");       printf_XY(48,3,"7 ...");
 	printf_XY(6,4,"3 TsMe");       printf_XY(48,4,"8 rtc");
-	printf_XY(6,5,"4 ...");       printf_XY(48,5,"9 test");
+	printf_XY(6,5,"4 T100");       printf_XY(48,5,"9 test");
 
 	//printf_XY(0,1,">");
 
@@ -286,11 +286,21 @@ int main_key_selection(void)
 	{
 		LCD_Clear_5110();
 		Printf("4 ...");
+		while(1){
+			SetMoto(0,100);
+			SetMoto(1,100);
+			wait(0.02);
+		}
 	}
 	else if(sum_key==5)
 	{
 		LCD_Clear_5110();
 		Printf("5 ...");
+		while(1){
+			SetMoto(0,100);
+			SetMoto(1,100);
+			wait(0.02);
+		}
 	}
 	else if(sum_key==6)
 	{

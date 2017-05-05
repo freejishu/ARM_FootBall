@@ -53,7 +53,7 @@ unsigned int psd_heng_middle=200;
 int compass_1=0;    //unsigned int compass_1=0;  /*指南针*/
 
 float power_speed=1.0,t;
-unsigned int ball=80;/*有没有球*/
+unsigned int ball=20;/*有没有球*/
 unsigned int ball_huoyan=0; //火焰 待测 
 unsigned int psdf_kaqiang=550; //火焰 待测 
 unsigned int eye_ch_num=0, eye_ch_left=0, eye_ch_right=0 ,gi_left_right=0;
@@ -191,12 +191,12 @@ int my_fwjc_cmp(){
 
 int sub_findfootball(){
 	LCD_Clear_5110();
-	printf_XY(0,0,"ftbl a 0.12");
+	printf_XY(0,0,"ftbl a 0.13");
 
 	eye_ch_all=GetEyeMaxNum(2,0); //获取360上复眼方向
 	eye_ch_num=GetSingleEye(eye_ch_all,0); //获取单个 
 	 
-	if(AI(5) > ball_huoyan) return 0;//进攻 
+	//if(AI(5) > ball_huoyan) return 0;//进攻 
 	
 	//分块控制
 	//                                  近距离             远距离 
