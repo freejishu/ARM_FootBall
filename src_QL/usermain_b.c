@@ -56,15 +56,15 @@ float power_speed=1.0,t;
 unsigned int ball=20;/*ÓÐÃ»ÓÐÇò*/
 unsigned int ball_huoyan=0; //»ðÑæ ´ý²â 
 unsigned int psdf_kaqiang=550; //»ðÑæ ´ý²â 
-unsigned int eye_ch_num=0, eye_ch_left=0, eye_ch_right=0 ,gi_left_right=0;
-unsigned int eye_ch_max_s=0, tag_ball_distance=0,my_cha=0;
+unsigned int eye_ch_num=0;//, eye_ch_left=0, eye_ch_right=0 ,gi_left_right=0;
+//unsigned int eye_ch_max_s=0, tag_ball_distance=0,my_cha=0;
 
-unsigned int Run_LastPost_1=0;  /*×óÂÖÉÏ´ÎÌá½»ÊýÖµ*/
-unsigned int Run_LastPost_2=0;  /*ÓÒÂÖÉÏ´ÎÌá½»ÊýÖµ*/
+//unsigned int Run_LastPost_1=0;  /*×óÂÖÉÏ´ÎÌá½»ÊýÖµ*/
+//unsigned int Run_LastPost_2=0;  /*ÓÒÂÖÉÏ´ÎÌá½»ÊýÖµ*/
 
-unsigned int Run_Ball_0=0;  /*¸´ÑÛÎ»ÖÃ¼ÇÂ¼*/
-unsigned int Run_Ball_1=0;  
-unsigned int Run_Ball_2=0;  
+//unsigned int Run_Ball_0=0;  /*¸´ÑÛÎ»ÖÃ¼ÇÂ¼*/
+//unsigned int Run_Ball_1=0;  
+//unsigned int Run_Ball_2=0;  
 
 unsigned int my_status=0;
 
@@ -86,10 +86,10 @@ int eye_yuan_jin=0;
 int my_EyeChMax()
 {
 	int ch=0;
-	Run_Ball_2 = Run_Ball_1;
-	Run_Ball_1 = Run_Ball_0;
+	//Run_Ball_2 = Run_Ball_1;
+	//Run_Ball_1 = Run_Ball_0;
 	ch = EyeChMax();
-	Run_Ball_0 = ch;
+	//Run_Ball_0 = ch;
 	return ch;
 }
 
@@ -102,6 +102,8 @@ void Run(int sl,int sr)   //¿ÉÉèÖÃ¹¦ÂÊ,·¶Î§-100--100   ¿ÉÍ¨¹ý×óÏÂºÍÓÒÏÂ°´Å¥¿ØÖÆµ
 	//Run_LastPost_2=sr;
 	//SetMoto(0,sl*power_speed);
 	//SetMoto(1,sr*power_speed); 
+	if(sl>10)sl=sl-10;
+	if(sr>10)sr=sr-10;
 	SetMoto(0,sl);
 	SetMoto(1,sr); 
 }
@@ -190,19 +192,22 @@ int my_fwjc_cmp(){
 }
 
 int sub_findfootball(){
-	LCD_Clear_5110();
-	printf_XY(0,0,"ftbl a 0.13");
 
-	eye_ch_all=GetEyeMaxNum(2,0); //»ñÈ¡360ÉÏ¸´ÑÛ·½Ïò
+	//eye_ch_all=GetEyeMaxNum(2,0); //»ñÈ¡360ÉÏ¸´ÑÛ·½Ïò
+	eye_ch_all= EyeChMax();
 	eye_ch_num=GetSingleEye(eye_ch_all,0); //»ñÈ¡µ¥¸ö 
+	LCD_Clear_5110();
+	printf_XY(0,1,"EYE_CH=%d",eye_ch_all);
+	printf_XY(0,2,"EYE_IN=%d",eye_ch_num);
 	 
 	//if(AI(5) > ball_huoyan) return 0;//½ø¹¥ 
 	
 	//·Ö¿é¿ØÖÆ
 	//                                  ½ü¾àÀë             Ô¶¾àÀë 
-	if(eye_ch_num > eye_yuan_jin){    
-		if(eye_ch_num > eye_yuan_jin) Run(0,100);   else Run(0,100);
-	}else if(eye_ch_all==1){
+	//if(eye_ch_num > eye_yuan_jin){    
+	//	if(eye_ch_num > eye_yuan_jin) Run(0,100);   else Run(0,100);
+	//}else 
+	if(eye_ch_all==1){
 		if(eye_ch_num > eye_yuan_jin) Run(30,100);  else Run(30,100);
 	}else if(eye_ch_all==2){
 		if(eye_ch_num > eye_yuan_jin) Run(60,100);  else Run(60,100);
@@ -296,17 +301,15 @@ void attack_goal( )     /*Õý·½Ïò½ø¹¥*/
 
 
 int sub_main(void)
-{			
+{
 	LCD_Clear_5110();
-	printf_XY(0,0,"ftbl a 0.01");
-
+	printf_XY(0,0,"ftbl a 0.13");
 	my_status=1;//1-Ñ°Çò 2-½ø¹¥ 3-·ÀÊØ 
 	while(1)
 	{   
-		LCD_Clear_5110();
-		printf_XY(0,0,"ftbl a 0.02");
-		while(EyeInMax() < ball){Run_back();}
+		//while(EyeInMax() < ball){Run_back();}
 		sub_findfootball();
+		wait(0.02);
 		//while (1) if(Get_Button(0)==1) break;
 	}
 }

@@ -183,9 +183,9 @@ int main_key_selection(void)
 		float t_1 = 0 ,t_2 = 0;
 		t_1=seconds();
 		for(i=0;i<10000;i++){
-		t_2 = i/3;
-		
-}LCD_Clear_5110();
+			t_2 = i/3;
+		}
+		LCD_Clear_5110();
 		printf_XY(0,0,"1 Printf_test\n");
 		printf_XY(0,1,"*******");
 		printf_XY(0,2,"i=%d",i);
@@ -199,13 +199,13 @@ int main_key_selection(void)
 		
 
 		while(1){
-    LCD_Clear_5110();  
+    	LCD_Clear_5110();  
     //Printf("ch=%d,ch=%d,"MY_EyeChMax()); 
 		printf_XY(0,1,"Tch=%d",GetEyeMaxNum(2,0));    printf_XY(42,1,"Tin=%d",GetEyeMaxValue(2,0));
 		printf_XY(0,2,"10C=%d",s_GetEyeMaxNum(2,0));  printf_XY(42,2,"10I=%d",s_GetEyeMaxValue(2,0));
 		printf_XY(0,3,"ch=%d",GetEyeMaxNum(2,1));     printf_XY(42,3,"in=%d",GetEyeMaxValue(2,1));
-    printf_XY(0,4,"HCh=%d",HTZ_Ch);               printf_XY(42,4,"HIn=%d",HTZ_In);
-    printf_XY(0,5,"T10=%d",GetSingleEye(10,0));   printf_XY(44,5,"10C=%d",GetSingleEye(10,1));
+    	printf_XY(0,4,"HCh=%d",HTZ_Ch);               printf_XY(42,4,"HIn=%d",HTZ_In);
+    	printf_XY(0,5,"T10=%d",GetSingleEye(10,0));   printf_XY(44,5,"10C=%d",GetSingleEye(10,1));
 		printf_XY(0,0,"Test MaiChong"); 
 		wait(0.1);
 		}
@@ -286,21 +286,11 @@ int main_key_selection(void)
 	{
 		LCD_Clear_5110();
 		Printf("4 ...");
-		while(1){
-			SetMoto(0,100);
-			SetMoto(1,100);
-			wait(0.02);
-		}
 	}
 	else if(sum_key==5)
 	{
 		LCD_Clear_5110();
 		Printf("5 ...");
-		while(1){
-			SetMoto(0,100);
-			SetMoto(1,100);
-			wait(0.02);
-		}
 	}
 	else if(sum_key==6)
 	{
