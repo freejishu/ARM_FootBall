@@ -170,7 +170,7 @@ int sub_main(void)
 	{   
 		//while(EyeInMax() < ball){Run_back();}
 		sub_findfootball();
-		wait(0.02);
+		wait(0.03);
 		//while (1) if(Get_Button(0)==1) break;
 	}
 }
