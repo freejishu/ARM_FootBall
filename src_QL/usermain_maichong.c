@@ -71,7 +71,7 @@ int GetSingleEye(int n,int m)
 	//temp=last[n]*0.5;
 	//if(dis < temp) dis = GetSingleEye(n,m);
 	//last[n] = dis ;
-    return dis*2;
+    return dis;
 }
 
 int GetEyeMaxNum(int n,int m)

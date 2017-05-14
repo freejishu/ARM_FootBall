@@ -1,9 +1,3 @@
-#define irl     AI(0)           
-#define irf     AI(1)
-#define irr     AI(2)
-#define irb     AI(3)
-
-
 #include "RobotLib.h"
 #include "key_selection.h"
 
@@ -74,7 +68,7 @@ int main_key_selection(void)
 {	
 
 	if(FLASH_Read(50)<18)
-		sum_key=FLASH_Read(50);
+	sum_key=0;
 	
 	LCD_Clear_5110();
 	printf_XY(2,0,"QX_ROBOT I");    printf_XY(76,0,"%d",sum_key);
@@ -242,10 +236,10 @@ int main_key_selection(void)
 				SetMoto(0,speed_left);
 				LCD_Clear_5110();
 				printf_XY(0,0,"Mec Test");
-				printf_XY(0,1,"********************");
-				printf_XY(0,2,"ls=%d",speed_left);
-				printf_XY(0,3,"rs=%d",speed_right);
-				printf_XY(0,4,"********************");
+				//printf_XY(0,1,"********************");
+				printf_XY(0,1,"ls=%d",speed_left);
+				printf_XY(0,2,"rs=%d",speed_right);
+				//printf_XY(0,4,"********************");
 				wait(0.5);
 			}
 			if(Get_Button(2)==1) {
@@ -264,13 +258,15 @@ int main_key_selection(void)
 				SetMoto(1,speed_right);
 				LCD_Clear_5110();
 				printf_XY(0,0,"Mec Test");
-				printf_XY(0,1,"********************");
-				printf_XY(0,2,"ls=%d",speed_left);
-				printf_XY(0,3,"rs=%d",speed_right);
-				printf_XY(0,4,"********************");
+				//printf_XY(0,1,"********************");
+				printf_XY(0,1,"ls=%d",speed_left);
+				printf_XY(0,2,"rs=%d",speed_right);
+				//printf_XY(0,4,"********************");
 				wait(0.5);
 			}
-				wait(0.03);
+			printf_XY(0,3,"ec=%d",EyeChMax());
+			printf_XY(0,4,"em=%d",GetSingleEye(EyeChMax(),0));
+			wait(0.03);
 		}
 		
 		//printf_XY(0,2,"left speed=100");
